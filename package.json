@@ -1,0 +1,11 @@
+{
+  "name": "typescript-practice---bms",
+  "version": "1.0.0",
+  "description": "Conversion of JS Book Management System to Typescript",
+  "main": "server.ts",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Fatima Khalid",
+  "license": "ISC"
+}
