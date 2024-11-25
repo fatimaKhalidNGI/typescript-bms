@@ -8,4 +8,8 @@ const booksController_1 = __importDefault(require("../controllers/booksControlle
 const router = (0, express_1.Router)();
 router.post('/create', booksController_1.default.addNewBook);
 router.get('/list', booksController_1.default.listOfBooks);
+router.post('/searchByAuthor', booksController_1.default.searchByAuthor);
+router.post('/searchByTitle', booksController_1.default.searchByTitle);
+router.put('/update/:book_id', booksController_1.default.updateBook);
+router.delete('/delete', booksController_1.default.deleteBook);
 exports.default = router;
