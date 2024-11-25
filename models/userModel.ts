@@ -1,6 +1,7 @@
-import { DataTypes, Model, Sequelize, Association } from "sequelize";
+import { DataTypes, Model, Sequelize, Association, QueryTypes } from "sequelize";
 import { Book } from './bookModel';
 import { Request } from "./requestModel";
+import { sequelize } from "../config/dbConfig";
 
 interface UserAttributes {
     user_id? : number;
@@ -34,7 +35,75 @@ export class User extends Model<UserAttributes> implements UserAttributes {
             foreignKey: 'user_id',
             as: 'bookRequest',
         });
-    };
+    }
+
+    public static checkDuplicateUser = async(email : string) : Promise<any[]> => {
+        const query = `SELECT * FROM users WHERE email = :email`;
+        const replacements = { email };
+
+        try{
+            const duplicateUser = await sequelize.query(query, {
+                replacements,
+                type : QueryTypes.SELECT
+            });
+
+            return [duplicateUser];
+
+        } catch(error){
+            throw new Error(`Error in checking duplicates: ${error}`);
+        }
+    }
+
+    public static registerNewUser = async(name : string, email : string, password : string, role : string) : Promise<any> => {
+        const query = `INSERT INTO users (name, email, password, role) VALUES (:name, :email, :password, :role)`;
+        const replacements = { name, email, password, role };
+
+        try{
+            const [newUser] = await sequelize.query(query, {
+                replacements,
+                type : QueryTypes.INSERT
+            });
+
+            return newUser;
+
+        } catch(error){
+            throw new Error(`Error in registering user: ${error}`);
+        }
+    }
+
+    public static findUser_login = async(email : string) : Promise<any> => {
+        const query = `SELECT * FROM users WHERE email = :email`;
+        const values = { email };
+
+        try{
+            const [foundUser] = await sequelize.query(query, {
+                replacements : values,
+                type : QueryTypes.SELECT
+            });
+
+            return foundUser;
+
+        } catch(error){
+            throw new Error(`Error in finding user: ${error}`);
+        }
+    }
+
+    public static loginFunction = async(user_id : number, refreshToken : string) : Promise<string> => {
+        const query = `UPDATE users SET refresh_token = :refresh_token WHERE user_id = :user_id`;
+        const values = { refresh_token : refreshToken, user_id };
+
+        try{
+            const result = await sequelize.query(query, {
+                replacements : values,
+                type: QueryTypes.UPDATE, // Explicitly declare query type
+            });
+            
+            return "Success";
+
+        } catch(error){
+            throw new Error(`Error in logging user in: ${error}`);
+        }
+    }
 }
 
 export default (sequelize : Sequelize) : typeof User => {

@@ -61,6 +61,89 @@ export class Book extends Model<BookAttributes> implements BookAttributes{
             throw new Error(`Error in getting books list: ${error}`);
         }
     }
+
+    public static findByAuthor = async(st : string) => {
+        const query = `SELECT title, author FROM books WHERE author LIKE :searchTerm AND borrowDate IS NULL`;
+        const values = { searchTerm : `%${st}%` };
+
+        try{
+            const results = await sequelize.query(query, { 
+                replacements : values,
+                type : QueryTypes.SELECT
+            });
+
+            return results;
+
+        } catch(error){
+            throw new Error(`Error in searching by author: ${error}`);
+        }
+    }
+
+    public static findByTitle = async(st : string) => {
+        const query = `SELECT title, author FROM books WHERE title LIKE :searchTerm AND borrowDate IS NULL`;
+        const values = { searchTerm : `%${st}%` };
+
+        try{
+            const results = await sequelize.query(query, { 
+                replacements : values,
+                type : QueryTypes.SELECT
+            });
+
+            return results;
+
+        } catch(error){
+            throw new Error(`Error in searching by title: ${error}`);
+        }
+    }
+
+    public static updateDetails = async(book_id : number, updates : Record<string, any>) : Promise<number> => {
+        console.log(updates);
+        
+        const setClause = Object.keys(updates)
+            .map((key) => `${key} = :${key}`)
+            .join(", ");
+
+
+        const values = { ...updates, book_id };
+
+        console.log(setClause, values);
+
+        const query = `UPDATE books SET ${setClause} WHERE book_id = :book_id`;
+
+        try{
+            const result = await sequelize.query(query,{
+                replacements : values,
+                type : QueryTypes.UPDATE
+            });
+            
+            const updatedRows = result[1] as number | undefined;
+            return updatedRows ?? 0;
+
+        } catch(error){
+            throw new Error(`Error in updating book: ${error}`);
+        }
+    }
+
+    public static remove = async(book_id : number) : Promise<string> => {
+        const query = `DELETE FROM books WHERE book_id = :book_id`;
+        //const values = { book_id };
+
+        try{
+            const [result] = await sequelize.query(query, {
+                replacements: { book_id },
+            });
+
+            const affectedRows = result[0] as number | undefined;
+            
+            if (affectedRows === 0) {
+                return "Not found";
+            }
+            return "Removed";
+
+        } catch(error){
+            throw new Error(`Error in deleting book: ${error}`);
+        }
+    }
 }
 
 export default (sequelize : Sequelize) : typeof Book => {

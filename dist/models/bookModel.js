@@ -49,6 +49,71 @@ Book.listBooks = () => __awaiter(void 0, void 0, void 0, function* () {
         throw new Error(`Error in getting books list: ${error}`);
     }
 });
+Book.findByAuthor = (st) => __awaiter(void 0, void 0, void 0, function* () {
+    const query = `SELECT title, author FROM books WHERE author LIKE :searchTerm AND borrowDate IS NULL`;
+    const values = { searchTerm: `%${st}%` };
+    try {
+        const results = yield dbConfig_1.sequelize.query(query, {
+            replacements: values,
+            type: sequelize_1.QueryTypes.SELECT
+        });
+        return results;
+    }
+    catch (error) {
+        throw new Error(`Error in searching by author: ${error}`);
+    }
+});
+Book.findByTitle = (st) => __awaiter(void 0, void 0, void 0, function* () {
+    const query = `SELECT title, author FROM books WHERE title LIKE :searchTerm AND borrowDate IS NULL`;
+    const values = { searchTerm: `%${st}%` };
+    try {
+        const results = yield dbConfig_1.sequelize.query(query, {
+            replacements: values,
+            type: sequelize_1.QueryTypes.SELECT
+        });
+        return results;
+    }
+    catch (error) {
+        throw new Error(`Error in searching by title: ${error}`);
+    }
+});
+Book.updateDetails = (book_id, updates) => __awaiter(void 0, void 0, void 0, function* () {
+    console.log(updates);
+    const setClause = Object.keys(updates)
+        .map((key) => `${key} = :${key}`)
+        .join(", ");
+    const values = Object.assign(Object.assign({}, updates), { book_id });
+    console.log(setClause, values);
+    const query = `UPDATE books SET ${setClause} WHERE book_id = :book_id`;
+    try {
+        const result = yield dbConfig_1.sequelize.query(query, {
+            replacements: values,
+            type: sequelize_1.QueryTypes.UPDATE
+        });
+        const updatedRows = result[1];
+        return updatedRows !== null && updatedRows !== void 0 ? updatedRows : 0;
+    }
+    catch (error) {
+        throw new Error(`Error in updating book: ${error}`);
+    }
+});
+Book.remove = (book_id) => __awaiter(void 0, void 0, void 0, function* () {
+    const query = `DELETE FROM books WHERE book_id = :book_id`;
+    //const values = { book_id };
+    try {
+        const [result] = yield dbConfig_1.sequelize.query(query, {
+            replacements: { book_id },
+        });
+        const affectedRows = result[0];
+        if (affectedRows === 0) {
+            return "Not found";
+        }
+        return "Removed";
+    }
+    catch (error) {
+        throw new Error(`Error in deleting book: ${error}`);
+    }
+});
 exports.default = (sequelize) => {
     Book.init({
         book_id: {
