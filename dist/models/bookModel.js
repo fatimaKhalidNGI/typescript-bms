@@ -111,6 +111,37 @@ Book.checkBook = (book_id) => __awaiter(void 0, void 0, void 0, function* () {
         throw new Error(`Error in checking book for deletion: ${error}`);
     }
 });
+Book.checkAvailability = (book_id) => __awaiter(void 0, void 0, void 0, function* () {
+    const query = `SELECT * FROM books WHERE book_id = :book_id AND borrowDate IS NULL`;
+    const values = { book_id };
+    try {
+        const [foundBook] = yield dbConfig_1.sequelize.query(query, {
+            replacements: values,
+            type: sequelize_1.QueryTypes.SELECT
+        });
+        if (!foundBook) {
+            return "Not available";
+        }
+        return "Available";
+    }
+    catch (error) {
+        throw new Error(`Error in checking book availability: ${error}`);
+    }
+});
+Book.borrow = (book_id, borrowDate, returnDate, user_id) => __awaiter(void 0, void 0, void 0, function* () {
+    const query = `UPDATE books SET borrowDate = :borrowDate, returnDate = :returnDate, user_id = :user_id WHERE book_id = :book_id`;
+    const values = { borrowDate, returnDate, user_id, book_id };
+    try {
+        const [bookBorrowed] = yield dbConfig_1.sequelize.query(query, {
+            replacements: values,
+            type: sequelize_1.QueryTypes.UPDATE
+        });
+        return bookBorrowed;
+    }
+    catch (error) {
+        throw new Error(`Error in borrowing book: ${error}`);
+    }
+});
 Book.remove = (book_id) => __awaiter(void 0, void 0, void 0, function* () {
     const query = `DELETE FROM books WHERE book_id = :book_id`;
     //const values = { book_id };
@@ -123,6 +154,49 @@ Book.remove = (book_id) => __awaiter(void 0, void 0, void 0, function* () {
     }
     catch (error) {
         throw new Error(`Error in deleting book: ${error}`);
+    }
+});
+Book.checkBorrow = (book_id, user_id) => __awaiter(void 0, void 0, void 0, function* () {
+    const query = `SELECT * FROM books WHERE book_id = :book_id AND user_id = :user_id`;
+    const values = { book_id, user_id };
+    try {
+        const [checked] = yield dbConfig_1.sequelize.query(query, {
+            replacements: values,
+            type: sequelize_1.QueryTypes.SELECT
+        });
+        return checked;
+    }
+    catch (error) {
+        throw new Error(`Error in checnking borrowed book: ${error}`);
+    }
+});
+Book.returnBook = (book_id) => __awaiter(void 0, void 0, void 0, function* () {
+    const query = `UPDATE books SET borrowDate = NULL, returnDate = NULL, user_id = NULL WHERE book_id = :book_id`;
+    const values = { book_id };
+    try {
+        const returnedBook = yield dbConfig_1.sequelize.query(query, {
+            replacements: values,
+            type: sequelize_1.QueryTypes.UPDATE
+        });
+        return returnedBook;
+    }
+    catch (error) {
+        throw new Error(`Error in returning book: ${error}`);
+    }
+});
+Book.borrowedBooksList = (user_id) => __awaiter(void 0, void 0, void 0, function* () {
+    const query = `SELECT * FROM books WHERE user_id = :user_id`;
+    const values = { user_id };
+    try {
+        const [borrowedList] = yield dbConfig_1.sequelize.query(query, {
+            replacements: values,
+            type: sequelize_1.QueryTypes.SELECT
+        });
+        console.log(borrowedList);
+        return borrowedList;
+    }
+    catch (error) {
+        throw new Error(`Error in getting list of borrowed books: ${error}`);
     }
 });
 exports.default = (sequelize) => {

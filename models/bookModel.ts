@@ -141,6 +141,44 @@ export class Book extends Model<BookAttributes> implements BookAttributes{
         }
     }
 
+    public static checkAvailability = async(book_id : number) : Promise<string> => {
+        const query = `SELECT * FROM books WHERE book_id = :book_id AND borrowDate IS NULL`;
+        const values = { book_id };
+
+        try{
+            const [foundBook] = await sequelize.query(query, {
+                replacements : values,
+                type : QueryTypes.SELECT
+            });
+
+            if(!foundBook){
+                return "Not available";
+            }
+
+            return "Available";
+
+        } catch(error){
+            throw new Error(`Error in checking book availability: ${error}`);
+        }
+    }
+
+    public static borrow = async(book_id : number, borrowDate : Date, returnDate : Date, user_id : number|undefined) => {
+        const query = `UPDATE books SET borrowDate = :borrowDate, returnDate = :returnDate, user_id = :user_id WHERE book_id = :book_id`;
+        const values = { borrowDate, returnDate, user_id, book_id };
+
+        try{
+            const [bookBorrowed] = await sequelize.query(query, {
+                replacements : values,
+                type : QueryTypes.UPDATE
+            });
+
+            return bookBorrowed;
+            
+        } catch(error){
+            throw new Error(`Error in borrowing book: ${error}`);
+        }
+    }
+
     public static remove = async(book_id : number) : Promise<string> => {
         const query = `DELETE FROM books WHERE book_id = :book_id`;
         //const values = { book_id };
@@ -155,6 +193,59 @@ export class Book extends Model<BookAttributes> implements BookAttributes{
 
         } catch(error){
             throw new Error(`Error in deleting book: ${error}`);
+        }
+    }
+
+    public static checkBorrow = async(book_id : number, user_id : number|undefined) => {
+        const query = `SELECT * FROM books WHERE book_id = :book_id AND user_id = :user_id`;
+        const values = { book_id, user_id };
+
+        try{
+            const [checked] = await sequelize.query(query, {
+                replacements : values,
+                type : QueryTypes.SELECT
+            });
+
+            return checked;
+
+        } catch(error){
+            throw new Error(`Error in checnking borrowed book: ${error}`);
+        }
+    }
+
+    public static returnBook = async(book_id : number) => {
+        const query = `UPDATE books SET borrowDate = NULL, returnDate = NULL, user_id = NULL WHERE book_id = :book_id`;
+        const values = { book_id };
+
+        try{
+            const returnedBook = await sequelize.query(query, {
+                replacements : values,
+                type : QueryTypes.UPDATE
+            });
+
+            return returnedBook;
+
+        } catch(error){
+            throw new Error(`Error in returning book: ${error}`);
+        }
+    }
+
+    public static borrowedBooksList = async(user_id : number|undefined) => {
+        const query = `SELECT * FROM books WHERE user_id = :user_id`;
+        const values = { user_id };
+
+        try{
+            const [borrowedList] = await sequelize.query(query, {
+                replacements : values,
+                type : QueryTypes.SELECT
+            });
+
+            console.log(borrowedList);
+
+            return borrowedList;
+
+        } catch(error){
+            throw new Error(`Error in getting list of borrowed books: ${error}`);
         }
     }
 }

@@ -58,4 +58,4 @@ const authUser = async(req : CustomRequest, res : Response, next : NextFunction)
     next();
 }
 
-export { verifyJWT, authAdmin, authUser }; 
+export { verifyJWT, authAdmin, authUser, CustomRequest }; 
