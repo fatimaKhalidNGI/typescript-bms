@@ -6,6 +6,7 @@ import { connectDB } from './config/dbConfig';
 import bookRoutes from './routes/bookRoutes';
 import authRoutes from './routes/authRoutes';
 import userRoutes from './routes/userRoutes';
+import libraryFuncsRoutes from './routes/libraryFuncsRoutes';
 
 dotenv.config({ path : './.env' });
 
@@ -22,6 +23,7 @@ const port : number = parseInt(process.env.PORT || '3500', 10);
 app.use('/books', bookRoutes);
 app.use('/auth', authRoutes);
 app.use('/users', userRoutes);
+app.use('/library', libraryFuncsRoutes);
 
 app.listen(port, () => {
     console.log(`Server running on Port ${port}`);

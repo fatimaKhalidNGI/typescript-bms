@@ -183,7 +183,7 @@ User.updateDetails = (user_id, updates) => __awaiter(void 0, void 0, void 0, fun
         .join(", ");
     const values = Object.assign(Object.assign({}, updates), { user_id });
     console.log(setClause, values);
-    const query = `UPDATE users SET ${setClause} WHERE user_id = :user_id`;
+    const query = `UPDATE users SET ${setClause} WHERE user_id = :book_id`;
     try {
         const result = yield dbConfig_1.sequelize.query(query, {
             replacements: values,
