@@ -9,6 +9,7 @@ const cookie_parser_1 = __importDefault(require("cookie-parser"));
 const dbConfig_1 = require("./config/dbConfig");
 const bookRoutes_1 = __importDefault(require("./routes/bookRoutes"));
 const authRoutes_1 = __importDefault(require("./routes/authRoutes"));
+const userRoutes_1 = __importDefault(require("./routes/userRoutes"));
 dotenv_1.default.config({ path: './.env' });
 const app = (0, express_1.default)();
 app.use(express_1.default.json());
@@ -18,6 +19,7 @@ app.use((0, cookie_parser_1.default)());
 const port = parseInt(process.env.PORT || '3500', 10);
 app.use('/books', bookRoutes_1.default);
 app.use('/auth', authRoutes_1.default);
+app.use('/users', userRoutes_1.default);
 app.listen(port, () => {
     console.log(`Server running on Port ${port}`);
 });

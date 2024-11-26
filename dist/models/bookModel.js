@@ -97,17 +97,28 @@ Book.updateDetails = (book_id, updates) => __awaiter(void 0, void 0, void 0, fun
         throw new Error(`Error in updating book: ${error}`);
     }
 });
+Book.checkBook = (book_id) => __awaiter(void 0, void 0, void 0, function* () {
+    const query = `SELECT * FROM books WHERE book_id = :book_id`;
+    const values = { book_id };
+    try {
+        const [foundBook] = yield dbConfig_1.sequelize.query(query, {
+            replacements: values,
+            type: sequelize_1.QueryTypes.SELECT
+        });
+        return foundBook;
+    }
+    catch (error) {
+        throw new Error(`Error in checking book for deletion: ${error}`);
+    }
+});
 Book.remove = (book_id) => __awaiter(void 0, void 0, void 0, function* () {
     const query = `DELETE FROM books WHERE book_id = :book_id`;
     //const values = { book_id };
     try {
-        const [result] = yield dbConfig_1.sequelize.query(query, {
+        const result = yield dbConfig_1.sequelize.query(query, {
             replacements: { book_id },
+            type: sequelize_1.QueryTypes.DELETE
         });
-        const affectedRows = result[0];
-        if (affectedRows === 0) {
-            return "Not found";
-        }
         return "Removed";
     }
     catch (error) {

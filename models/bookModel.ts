@@ -124,20 +124,33 @@ export class Book extends Model<BookAttributes> implements BookAttributes{
         }
     }
 
+    public static checkBook = async(book_id : number) => {
+        const query = `SELECT * FROM books WHERE book_id = :book_id`;
+        const values = { book_id };
+
+        try{
+            const [foundBook] = await sequelize.query(query, {
+                replacements : values,
+                type : QueryTypes.SELECT
+            });
+            
+            return foundBook;
+             
+        } catch(error){
+            throw new Error(`Error in checking book for deletion: ${error}`);
+        }
+    }
+
     public static remove = async(book_id : number) : Promise<string> => {
         const query = `DELETE FROM books WHERE book_id = :book_id`;
         //const values = { book_id };
 
         try{
-            const [result] = await sequelize.query(query, {
+            const result : any = await sequelize.query(query, {
                 replacements: { book_id },
+                type : QueryTypes.DELETE
             });
 
-            const affectedRows = result[0] as number | undefined;
-            
-            if (affectedRows === 0) {
-                return "Not found";
-            }
             return "Removed";
 
         } catch(error){

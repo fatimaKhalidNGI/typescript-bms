@@ -86,11 +86,13 @@ class BookController {
         }
 
         try{
-            const removed = await BookModel.remove(book_id);
+            const foundBook = await BookModel.checkBook(book_id);
 
-            if(removed === "Not found"){
+            if(!foundBook){
                 return res.status(404).send("Book not found");
             }
+
+            const result = await BookModel.remove(book_id);
 
             res.status(200).send("Book deleted successfully!");
 
