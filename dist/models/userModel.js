@@ -83,6 +83,119 @@ User.loginFunction = (user_id, refreshToken) => __awaiter(void 0, void 0, void 0
         throw new Error(`Error in logging user in: ${error}`);
     }
 });
+User.checkUser_logout = (refreshToken) => __awaiter(void 0, void 0, void 0, function* () {
+    const query = `SELECT * FROM users WHERE refresh_token = :refreshToken`;
+    const values = { refreshToken };
+    try {
+        const [foundUser] = yield dbConfig_1.sequelize.query(query, {
+            replacements: values,
+            type: sequelize_1.QueryTypes.SELECT
+        });
+        return foundUser;
+    }
+    catch (error) {
+        throw new Error(`Error in checking user for logout: ${error}`);
+    }
+});
+User.logoutFunction = (user_id) => __awaiter(void 0, void 0, void 0, function* () {
+    const query = `UPDATE users SET refresh_token = NULL WHERE user_id = :user_id`;
+    const values = { user_id };
+    try {
+        const result = yield dbConfig_1.sequelize.query(query, {
+            replacements: values,
+            type: sequelize_1.QueryTypes.UPDATE
+        });
+        return "Success";
+    }
+    catch (error) {
+        throw new Error(`Error in logging user out: ${error}`);
+    }
+});
+User.listAll = () => __awaiter(void 0, void 0, void 0, function* () {
+    const query = `SELECT name, email, role FROM users`;
+    try {
+        const list = yield dbConfig_1.sequelize.query(query, {
+            type: sequelize_1.QueryTypes.SELECT
+        });
+        return list;
+    }
+    catch (error) {
+        throw new Error(`Error in getting users list: ${error}`);
+    }
+});
+User.usersList = () => __awaiter(void 0, void 0, void 0, function* () {
+    const query = `SELECT name, email FROM users WHERE role = "User"`;
+    try {
+        const foundUsers = yield dbConfig_1.sequelize.query(query, {
+            type: sequelize_1.QueryTypes.SELECT
+        });
+        return foundUsers;
+    }
+    catch (error) {
+        throw new Error(`Error in listing "users": ${error}`);
+    }
+});
+User.adminsList = () => __awaiter(void 0, void 0, void 0, function* () {
+    const query = `SELECT name, email FROM users WHERE role = "Admin"`;
+    try {
+        const foundUsers = yield dbConfig_1.sequelize.query(query, {
+            type: sequelize_1.QueryTypes.SELECT
+        });
+        return foundUsers;
+    }
+    catch (error) {
+        throw new Error(`Error in listing "admins": ${error}`);
+    }
+});
+User.checkUserExists = (user_id) => __awaiter(void 0, void 0, void 0, function* () {
+    const query = `SELECT * FROM users WHERE user_id = :user_id`;
+    const values = { user_id };
+    try {
+        const [foundUser] = yield dbConfig_1.sequelize.query(query, {
+            replacements: values,
+            type: sequelize_1.QueryTypes.SELECT
+        });
+        return foundUser;
+    }
+    catch (error) {
+        throw new Error(`Error in checking user: ${error}`);
+    }
+});
+User.deleteUser = (user_id) => __awaiter(void 0, void 0, void 0, function* () {
+    const query = `DELETE FROM users WHERE user_id = :user_id`;
+    const values = { user_id };
+    try {
+        const result = yield dbConfig_1.sequelize.query(query, {
+            replacements: values,
+            type: sequelize_1.QueryTypes.DELETE
+        });
+        console.log(result);
+        return result;
+    }
+    catch (error) {
+        throw new Error(`Error in deleting user: ${error}`);
+    }
+});
+User.updateDetails = (user_id, updates) => __awaiter(void 0, void 0, void 0, function* () {
+    console.log(updates);
+    const setClause = Object.keys(updates)
+        .map((key) => `${key} = :${key}`)
+        .join(", ");
+    const values = Object.assign(Object.assign({}, updates), { user_id });
+    console.log(setClause, values);
+    const query = `UPDATE users SET ${setClause} WHERE user_id = :user_id`;
+    try {
+        const result = yield dbConfig_1.sequelize.query(query, {
+            replacements: values,
+            type: sequelize_1.QueryTypes.UPDATE
+        });
+        const updatedRows = result[1];
+        return updatedRows !== null && updatedRows !== void 0 ? updatedRows : 0;
+    }
+    catch (error) {
+        throw new Error(`Error in updating book: ${error}`);
+    }
+});
 exports.default = (sequelize) => {
     User.init({
         user_id: {

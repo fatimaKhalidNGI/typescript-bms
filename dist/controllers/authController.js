@@ -63,7 +63,7 @@ AuthController.loginUser = (req, res) => __awaiter(void 0, void 0, void 0, funct
                 res.cookie('jwt', refreshToken, {
                     httpOnly: true,
                     sameSite: 'none',
-                    secure: true,
+                    secure: false,
                     maxAge: 24 * 60 * 60 * 1000,
                 });
                 res.status(200).send(accessToken);
@@ -73,6 +73,41 @@ AuthController.loginUser = (req, res) => __awaiter(void 0, void 0, void 0, funct
                 return res.status(500).send(error);
             }
         }
+    }
+    catch (error) {
+        console.log(error);
+        res.status(500).send(error);
+    }
+});
+AuthController.logoutUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const cookies = req.cookies;
+    console.log(cookies);
+    if (!(cookies === null || cookies === void 0 ? void 0 : cookies.jwt)) {
+        res.status(401).send("Not logged in");
+        return;
+    }
+    const refreshToken = cookies.jwt;
+    console.log("Refresh token from request cookies: ", refreshToken);
+    try {
+        const foundUser = yield dbConfig_1.UserModel.checkUser_logout(refreshToken);
+        if (!foundUser) {
+            res.clearCookie('jwt', {
+                httpOnly: true,
+                sameSite: 'none',
+                secure: true
+            });
+            res.status(204).send("Done");
+        }
+        console.log("found user: ", foundUser);
+        const result = yield dbConfig_1.UserModel.logoutFunction(foundUser.user_id);
+        if (result === "Success") {
+            res.clearCookie('jwt', {
+                httpOnly: true,
+                sameSite: 'none',
+                secure: true
+            });
+        }
+        res.status(204).send("Done");
     }
     catch (error) {
         console.log(error);

@@ -104,6 +104,149 @@ export class User extends Model<UserAttributes> implements UserAttributes {
             throw new Error(`Error in logging user in: ${error}`);
         }
     }
+
+    public static checkUser_logout = async(refreshToken : string) => {
+        const query = `SELECT * FROM users WHERE refresh_token = :refreshToken`;
+        const values = { refreshToken };
+
+        try{
+            const [foundUser] = await sequelize.query(query, {
+                replacements : values,
+                type : QueryTypes.SELECT
+            });
+
+            return foundUser as User;
+
+        } catch(error){
+            throw new Error(`Error in checking user for logout: ${error}`);
+        }
+    }
+
+    public static logoutFunction = async(user_id : number) => {
+        const query = `UPDATE users SET refresh_token = NULL WHERE user_id = :user_id`;
+        const values = { user_id };
+
+        try{
+            const result = await sequelize.query(query, {
+                replacements : values,
+                type : QueryTypes.UPDATE
+            });
+
+            return "Success";
+
+        } catch(error){
+            throw new Error(`Error in logging user out: ${error}`);
+        }
+    }
+
+    public static listAll = async() => {
+        const query = `SELECT name, email, role FROM users`;
+
+        try{
+            const list = await sequelize.query(query, {
+                type : QueryTypes.SELECT
+            });
+
+            return list;
+
+        } catch(error){
+            throw new Error(`Error in getting users list: ${error}`);
+        }
+    }
+
+    public static usersList = async() => {
+        const query = `SELECT name, email FROM users WHERE role = "User"`;
+
+        try{
+            const foundUsers = await sequelize.query(query, {
+                type : QueryTypes.SELECT
+            });
+
+            return foundUsers;
+
+        } catch(error){
+            throw new Error(`Error in listing "users": ${error}`);
+        }
+    }
+
+    public static adminsList = async() => {
+        const query = `SELECT name, email FROM users WHERE role = "Admin"`;
+
+        try{
+            const foundUsers = await sequelize.query(query, {
+                type : QueryTypes.SELECT
+            });
+
+            return foundUsers;
+
+        } catch(error){
+            throw new Error(`Error in listing "admins": ${error}`);
+        }
+    }
+
+    public static checkUserExists = async(user_id : number) => {
+        const query = `SELECT * FROM users WHERE user_id = :user_id`;
+        const values = { user_id };
+
+        try{
+            const [foundUser] = await sequelize.query(query, {
+                replacements : values,
+                type : QueryTypes.SELECT
+            });
+
+            return foundUser;
+
+        } catch(error){
+            throw new Error(`Error in checking user: ${error}`);
+        }
+    }
+
+    public static deleteUser = async(user_id : number) => {
+        const query = `DELETE FROM users WHERE user_id = :user_id`;
+        const values = { user_id };
+
+        try{
+            const result = await sequelize.query(query, {
+                replacements : values,
+                type : QueryTypes.DELETE
+            });
+
+            console.log(result);
+
+            return result;
+
+        } catch(error){
+            throw new Error(`Error in deleting user: ${error}`);
+        }
+    }
+
+    public static updateDetails = async(user_id : number, updates : Record<string, any>) => {
+        console.log(updates);
+        
+        const setClause = Object.keys(updates)
+            .map((key) => `${key} = :${key}`)
+            .join(", ");
+
+
+        const values = { ...updates, user_id };
+
+        console.log(setClause, values);
+
+        const query = `UPDATE users SET ${setClause} WHERE user_id = :book_id`;
+
+        try{
+            const result = await sequelize.query(query,{
+                replacements : values,
+                type : QueryTypes.UPDATE
+            });
+            
+            const updatedRows = result[1] as number | undefined;
+            return updatedRows ?? 0;
+
+        } catch(error){
+            throw new Error(`Error in updating book: ${error}`);
+        }
+    }
 }
 
 export default (sequelize : Sequelize) : typeof User => {

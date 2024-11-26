@@ -3,6 +3,7 @@ import bcrypt from 'bcrypt';
 import { Request, Response } from 'express';
 import { UserModel } from '../config/dbConfig';
 import {getTokens} from '../utils/getTokens';
+import { User } from '../models/userModel';
 
 dotenv.config({ path : '../.env'});
 
@@ -67,7 +68,7 @@ class AuthController {
                     res.cookie('jwt', refreshToken, {
                         httpOnly: true,
                         sameSite: 'none',
-                        secure: true, 
+                        secure: false, 
                         maxAge: 24 * 60 * 60 * 1000,
                     });
 
@@ -82,6 +83,53 @@ class AuthController {
             console.log(error);
             res.status(500).send(error);
         }
+    }
+
+    static logoutUser = async(req : Request, res : Response) => {
+        const cookies = req.cookies;
+
+        console.log(cookies);
+
+        if(!cookies?.jwt){
+            res.status(401).send("Not logged in");
+            return;
+        }
+
+        const refreshToken : string = cookies.jwt;
+        console.log("Refresh token from request cookies: ", refreshToken);
+
+        try{
+            const foundUser : User = await UserModel.checkUser_logout(refreshToken);
+
+            if(!foundUser){
+                res.clearCookie('jwt', {
+                    httpOnly : true,
+                    sameSite : 'none',
+                    secure : true
+                });
+
+                res.status(204).send("Done");
+            }
+
+            console.log("found user: ", foundUser);
+
+            const result = await UserModel.logoutFunction(foundUser.user_id);
+
+            if(result === "Success"){
+                res.clearCookie('jwt', {
+                    httpOnly : true,
+                    sameSite : 'none',
+                    secure : true
+                });
+            }
+
+            res.status(204).send("Done");
+
+        } catch(error){
+            console.log(error);
+            res.status(500).send(error);
+        }
+
     }
 }
 

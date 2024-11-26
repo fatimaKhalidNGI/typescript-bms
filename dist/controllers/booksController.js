@@ -86,10 +86,11 @@ BookController.deleteBook = (req, res) => __awaiter(void 0, void 0, void 0, func
         return res.status(400).send("Data missing!");
     }
     try {
-        const removed = yield dbConfig_1.BookModel.remove(book_id);
-        if (removed === "Not found") {
+        const foundBook = yield dbConfig_1.BookModel.checkBook(book_id);
+        if (!foundBook) {
             return res.status(404).send("Book not found");
         }
+        const result = yield dbConfig_1.BookModel.remove(book_id);
         res.status(200).send("Book deleted successfully!");
     }
     catch (error) {
