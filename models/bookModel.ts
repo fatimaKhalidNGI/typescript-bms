@@ -47,15 +47,31 @@ export class Book extends Model<BookAttributes> implements BookAttributes{
         }
     }
 
-    public static listBooks = async() => {
-        const query = `SELECT title, author FROM books`;
+    public static listBooks = async(page : number, limit : number) => {
+        const offset = (page - 1) * limit;
+        console.log(offset);
+        const query = `SELECT title, author FROM books ORDER BY title LIMIT :limit OFFSET :offset `;
+        const values = { limit, offset };
+
+        const countQuery = `SELECT COUNT(*) AS total FROM books`;
+
 
         try{
             const booksList = await sequelize.query(query, {
+                replacements : values,
                 type : QueryTypes.SELECT
             });
 
-            return booksList;
+            console.log(booksList);
+
+            const totalCountResult : any[] = await sequelize.query(countQuery, {
+                type : QueryTypes.SELECT
+            });
+            const total = totalCountResult[0].total;
+
+            console.log(total);
+
+            return {booksList , total};
 
         } catch(error){
             throw new Error(`Error in getting books list: ${error}`);
@@ -181,7 +197,6 @@ export class Book extends Model<BookAttributes> implements BookAttributes{
 
     public static remove = async(book_id : number) : Promise<string> => {
         const query = `DELETE FROM books WHERE book_id = :book_id`;
-        //const values = { book_id };
 
         try{
             const result : any = await sequelize.query(query, {
@@ -231,18 +246,16 @@ export class Book extends Model<BookAttributes> implements BookAttributes{
     }
 
     public static borrowedBooksList = async(user_id : number|undefined) => {
-        const query = `SELECT * FROM books WHERE user_id = :user_id`;
+        const query = `SELECT title, author, borrowDate, returnDate FROM books WHERE user_id = :user_id`;
         const values = { user_id };
 
         try{
-            const [borrowedList] = await sequelize.query(query, {
+            const borrowedList = await sequelize.query(query, {
                 replacements : values,
                 type : QueryTypes.SELECT
             });
 
-            console.log(borrowedList);
-
-            return borrowedList;
+            return borrowedList as { returnDate : Date}[];
 
         } catch(error){
             throw new Error(`Error in getting list of borrowed books: ${error}`);

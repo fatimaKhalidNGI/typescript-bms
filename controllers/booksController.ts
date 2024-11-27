@@ -13,15 +13,26 @@ class BookController {
             res.status(200).send("Book added successfully!");
 
         } catch(error){
-            console.log(error);
             res.status(500).send(error);
         }
     }
 
     static listOfBooks = async(req : Request, res : Response) : Promise<any> => {
+        const page = parseInt(req.query.page as string) || 1;
+        const limit = parseInt(req.query.limit as string ) || 10;
+
         try{
-            const booksList = await BookModel.listBooks();
-            res.status(200).send(booksList);
+            const { booksList, total } = await BookModel.listBooks(page, limit);
+
+            const response = {
+                booksList,
+                page,
+                limit,
+                total,
+                totalPages : Math.ceil(total / limit)
+            };
+
+            res.status(200).send(response);
         } catch(error){
             res.status(500).send(error);
         }

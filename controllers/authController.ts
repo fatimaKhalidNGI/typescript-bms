@@ -34,7 +34,6 @@ class AuthController {
             res.status(200).send("User registered successfully!");
 
         } catch(error){
-            console.log(error);
             res.status(500).send(error);
         }
     }
@@ -51,10 +50,7 @@ class AuthController {
                 return res.status(404).send("User not found");
             }
 
-            console.log(foundUser);
-
             const pwdMatch = await bcrypt.compare(password, foundUser.password);
-            console.log("password match: ", pwdMatch);
 
             if(pwdMatch){
                 try{
@@ -75,12 +71,10 @@ class AuthController {
                     res.status(200).send(accessToken);
 
                 } catch(error){
-                    console.log(error);
                     return res.status(500).send(error);
                 }
             }
         } catch(error){
-            console.log(error);
             res.status(500).send(error);
         }
     }
@@ -88,15 +82,12 @@ class AuthController {
     static logoutUser = async(req : Request, res : Response) => {
         const cookies = req.cookies;
 
-        console.log(cookies);
-
         if(!cookies?.jwt){
             res.status(401).send("Not logged in");
             return;
         }
 
         const refreshToken : string = cookies.jwt;
-        console.log("Refresh token from request cookies: ", refreshToken);
 
         try{
             const foundUser : User = await UserModel.checkUser_logout(refreshToken);
@@ -111,8 +102,6 @@ class AuthController {
                 res.status(204).send("Done");
             }
 
-            console.log("found user: ", foundUser);
-
             const result = await UserModel.logoutFunction(foundUser.user_id);
 
             if(result === "Success"){
@@ -126,7 +115,6 @@ class AuthController {
             res.status(204).send("Done");
 
         } catch(error){
-            console.log(error);
             res.status(500).send(error);
         }
 

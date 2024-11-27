@@ -9,6 +9,6 @@ const userAuth_1 = require("../middlewares/userAuth");
 const router = (0, express_1.Router)();
 router.use(userAuth_1.verifyJWT);
 router.put('/borrow', userAuth_1.authUser, libraryFunctionsController_1.default.borrowBook);
-router.put('/return', libraryFunctionsController_1.default.returnBook);
-router.get('/reminders', libraryFunctionsController_1.default.returnReminder);
+router.put('/return', userAuth_1.authUser, libraryFunctionsController_1.default.returnBook);
+router.get('/reminders', userAuth_1.authUser, libraryFunctionsController_1.default.returnReminder);
 exports.default = router;

@@ -34,11 +34,9 @@ LibraryFunctionsController.borrowBook = (req, res) => __awaiter(void 0, void 0, 
         rDate.setDate(rDate.getDate() + numDays);
         //borrow book
         const borrowed = yield dbConfig_1.BookModel.borrow(book_id, bDate, rDate, user_id);
-        console.log(borrowed);
         res.status(200).send("Book borrowed successfully");
     }
     catch (error) {
-        console.log(error);
         res.status(500).send(error);
     }
 });
@@ -50,7 +48,6 @@ LibraryFunctionsController.returnBook = (req, res) => __awaiter(void 0, void 0, 
     }
     try {
         const checkBook = yield dbConfig_1.BookModel.checkBorrow(book_id, user_id);
-        console.log(checkBook);
         if (checkBook === undefined) {
             res.status(404).send("This book has already been returned/not borrowed by you");
             return;
@@ -67,7 +64,6 @@ LibraryFunctionsController.returnBook = (req, res) => __awaiter(void 0, void 0, 
         }
     }
     catch (error) {
-        console.log(error);
         res.status(500).send(error);
     }
 });
@@ -75,10 +71,18 @@ LibraryFunctionsController.returnReminder = (req, res) => __awaiter(void 0, void
     const user_id = req.user_id;
     try {
         const borrowedBooks = yield dbConfig_1.BookModel.borrowedBooksList(user_id);
-        res.status(200).send(borrowedBooks);
+        const today_date = new Date();
+        const reminders = borrowedBooks.filter((book) => {
+            const daysRemaining = Math.floor((new Date(book.returnDate).getTime() - today_date.getTime()) / (1000 * 24 * 24 * 60));
+            return daysRemaining === 1;
+        });
+        if (reminders.length === 0) {
+            res.status(404).send("You have no books to return within 1 day");
+            return;
+        }
+        res.status(200).send(reminders);
     }
     catch (error) {
-        console.log(error);
         res.status(500).send(error);
     }
 });

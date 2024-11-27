@@ -7,6 +7,7 @@ import bookRoutes from './routes/bookRoutes';
 import authRoutes from './routes/authRoutes';
 import userRoutes from './routes/userRoutes';
 import libraryFuncsRoutes from './routes/libraryFuncsRoutes';
+import newBooksRequestRoutes from './routes/newBooksRequestsRoutes';
 
 dotenv.config({ path : './.env' });
 
@@ -24,6 +25,7 @@ app.use('/books', bookRoutes);
 app.use('/auth', authRoutes);
 app.use('/users', userRoutes);
 app.use('/library', libraryFuncsRoutes);
+app.use('/newBook', newBooksRequestRoutes);
 
 app.listen(port, () => {
     console.log(`Server running on Port ${port}`);

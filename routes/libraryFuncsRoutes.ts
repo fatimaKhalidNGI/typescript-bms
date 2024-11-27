@@ -8,7 +8,7 @@ const router : Router = Router();
 router.use(verifyJWT);
 
 router.put('/borrow', authUser, LibraryFunctionsController.borrowBook);
-router.put('/return', LibraryFunctionsController.returnBook);
-router.get('/reminders', LibraryFunctionsController.returnReminder);
+router.put('/return', authUser, LibraryFunctionsController.returnBook);
+router.get('/reminders', authUser, LibraryFunctionsController.returnReminder);
 
 export default router;

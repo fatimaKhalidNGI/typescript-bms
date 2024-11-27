@@ -169,7 +169,6 @@ User.deleteUser = (user_id) => __awaiter(void 0, void 0, void 0, function* () {
             replacements: values,
             type: sequelize_1.QueryTypes.DELETE
         });
-        console.log(result);
         return result;
     }
     catch (error) {
@@ -177,12 +176,10 @@ User.deleteUser = (user_id) => __awaiter(void 0, void 0, void 0, function* () {
     }
 });
 User.updateDetails = (user_id, updates) => __awaiter(void 0, void 0, void 0, function* () {
-    console.log(updates);
     const setClause = Object.keys(updates)
         .map((key) => `${key} = :${key}`)
         .join(", ");
     const values = Object.assign(Object.assign({}, updates), { user_id });
-    console.log(setClause, values);
     const query = `UPDATE users SET ${setClause} WHERE user_id = :book_id`;
     try {
         const result = yield dbConfig_1.sequelize.query(query, {
