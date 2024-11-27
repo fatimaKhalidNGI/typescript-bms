@@ -11,6 +11,7 @@ const bookRoutes_1 = __importDefault(require("./routes/bookRoutes"));
 const authRoutes_1 = __importDefault(require("./routes/authRoutes"));
 const userRoutes_1 = __importDefault(require("./routes/userRoutes"));
 const libraryFuncsRoutes_1 = __importDefault(require("./routes/libraryFuncsRoutes"));
+const newBooksRequestsRoutes_1 = __importDefault(require("./routes/newBooksRequestsRoutes"));
 dotenv_1.default.config({ path: './.env' });
 const app = (0, express_1.default)();
 app.use(express_1.default.json());
@@ -22,6 +23,7 @@ app.use('/books', bookRoutes_1.default);
 app.use('/auth', authRoutes_1.default);
 app.use('/users', userRoutes_1.default);
 app.use('/library', libraryFuncsRoutes_1.default);
+app.use('/newBook', newBooksRequestsRoutes_1.default);
 app.listen(port, () => {
     console.log(`Server running on Port ${port}`);
 });

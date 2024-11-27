@@ -36,7 +36,6 @@ AuthController.registerUser = (req, res) => __awaiter(void 0, void 0, void 0, fu
         res.status(200).send("User registered successfully!");
     }
     catch (error) {
-        console.log(error);
         res.status(500).send(error);
     }
 });
@@ -50,9 +49,7 @@ AuthController.loginUser = (req, res) => __awaiter(void 0, void 0, void 0, funct
         if (!foundUser) {
             return res.status(404).send("User not found");
         }
-        console.log(foundUser);
         const pwdMatch = yield bcrypt_1.default.compare(password, foundUser.password);
-        console.log("password match: ", pwdMatch);
         if (pwdMatch) {
             try {
                 const { accessToken, refreshToken } = (0, getTokens_1.getTokens)(foundUser);
@@ -69,25 +66,21 @@ AuthController.loginUser = (req, res) => __awaiter(void 0, void 0, void 0, funct
                 res.status(200).send(accessToken);
             }
             catch (error) {
-                console.log(error);
                 return res.status(500).send(error);
             }
         }
     }
     catch (error) {
-        console.log(error);
         res.status(500).send(error);
     }
 });
 AuthController.logoutUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const cookies = req.cookies;
-    console.log(cookies);
     if (!(cookies === null || cookies === void 0 ? void 0 : cookies.jwt)) {
         res.status(401).send("Not logged in");
         return;
     }
     const refreshToken = cookies.jwt;
-    console.log("Refresh token from request cookies: ", refreshToken);
     try {
         const foundUser = yield dbConfig_1.UserModel.checkUser_logout(refreshToken);
         if (!foundUser) {
@@ -98,7 +91,6 @@ AuthController.logoutUser = (req, res) => __awaiter(void 0, void 0, void 0, func
             });
             res.status(204).send("Done");
         }
-        console.log("found user: ", foundUser);
         const result = yield dbConfig_1.UserModel.logoutFunction(foundUser.user_id);
         if (result === "Success") {
             res.clearCookie('jwt', {
@@ -110,7 +102,6 @@ AuthController.logoutUser = (req, res) => __awaiter(void 0, void 0, void 0, func
         res.status(204).send("Done");
     }
     catch (error) {
-        console.log(error);
         res.status(500).send(error);
     }
 });

@@ -31,12 +31,10 @@ class LibraryFunctionsController {
 
             //borrow book
             const borrowed = await BookModel.borrow(book_id, bDate, rDate, user_id);
-            console.log(borrowed);
             
             res.status(200).send("Book borrowed successfully");
 
         } catch(error){
-            console.log(error);
             res.status(500).send(error);
         }
     }
@@ -51,8 +49,6 @@ class LibraryFunctionsController {
 
         try{
             const checkBook : any = await BookModel.checkBorrow(book_id, user_id);
-            
-            console.log(checkBook);
             
             if(checkBook === undefined){
                 res.status(404).send("This book has already been returned/not borrowed by you");
@@ -74,7 +70,6 @@ class LibraryFunctionsController {
             }
 
         } catch(error){
-            console.log(error);
             res.status(500).send(error);
         }
     }
@@ -83,12 +78,25 @@ class LibraryFunctionsController {
         const user_id = req.user_id;
 
         try{
-            const borrowedBooks = await BookModel.borrowedBooksList(user_id);
+            const borrowedBooks : { returnDate : Date}[] = await BookModel.borrowedBooksList(user_id);
 
-            res.status(200).send(borrowedBooks);
+            const today_date = new Date();
+            const reminders = borrowedBooks.filter((book : { returnDate : Date}) => {
+                const daysRemaining = Math.floor(
+                    (new Date(book.returnDate).getTime() - today_date.getTime()) / (1000 * 24 * 24 * 60)
+                );
+
+                return daysRemaining === 1;
+            })
+
+            if(reminders.length === 0){
+                res.status(404).send("You have no books to return within 1 day");
+                return;
+            }
+
+            res.status(200).send(reminders);
 
         } catch(error){
-            console.log(error);
             res.status(500).send(error);
         }
     }

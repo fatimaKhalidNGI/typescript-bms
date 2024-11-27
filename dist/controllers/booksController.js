@@ -24,14 +24,22 @@ BookController.addNewBook = (req, res) => __awaiter(void 0, void 0, void 0, func
         res.status(200).send("Book added successfully!");
     }
     catch (error) {
-        console.log(error);
         res.status(500).send(error);
     }
 });
 BookController.listOfBooks = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
     try {
-        const booksList = yield dbConfig_1.BookModel.listBooks();
-        res.status(200).send(booksList);
+        const { booksList, total } = yield dbConfig_1.BookModel.listBooks(page, limit);
+        const response = {
+            booksList,
+            page,
+            limit,
+            total,
+            totalPages: Math.ceil(total / limit)
+        };
+        res.status(200).send(response);
     }
     catch (error) {
         res.status(500).send(error);

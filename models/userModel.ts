@@ -211,8 +211,6 @@ export class User extends Model<UserAttributes> implements UserAttributes {
                 type : QueryTypes.DELETE
             });
 
-            console.log(result);
-
             return result;
 
         } catch(error){
@@ -221,16 +219,12 @@ export class User extends Model<UserAttributes> implements UserAttributes {
     }
 
     public static updateDetails = async(user_id : number, updates : Record<string, any>) => {
-        console.log(updates);
-        
         const setClause = Object.keys(updates)
             .map((key) => `${key} = :${key}`)
             .join(", ");
 
 
         const values = { ...updates, user_id };
-
-        console.log(setClause, values);
 
         const query = `UPDATE users SET ${setClause} WHERE user_id = :book_id`;
 

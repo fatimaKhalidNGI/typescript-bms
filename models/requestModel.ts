@@ -1,5 +1,6 @@
-import { DataTypes, Model, Sequelize, Association } from "sequelize";
+import { DataTypes, Model, Sequelize, Association, QueryTypes } from "sequelize";
 import { User } from "./userModel"; 
+import { sequelize } from "../config/dbConfig";
 
 interface RequestAttributes {
     request_id? : number;
@@ -28,6 +29,90 @@ export class Request extends Model<RequestAttributes> implements RequestAttribut
             foreignKey : 'user_id',
             as : 'requestedBy'
         });
+    }
+
+    public static createRequest = async(book_title : string, book_author : string, user_id : number|undefined) => {
+        const query = `INSERT INTO requests (book_title, book_author, status, admin_response, user_id) VALUES (:book_title, :book_author, "Pending", NULL, :user_id)`;
+        const values = { book_title, book_author, user_id};
+
+        try{
+            const newRequest = await sequelize.query(query, {
+                replacements : values,
+                type : QueryTypes.INSERT
+            });
+
+           
+            return newRequest;
+
+        } catch(error){
+            throw new Error(`Error in creating new request: ${error}`);
+        }
+    }
+
+    public static getAll = async() => {
+        const query = `SELECT book_title, book_author, status, admin_response FROM requests`;
+
+        try{
+            const requestList = await sequelize.query(query, {
+                type : QueryTypes.SELECT
+            });
+
+            return requestList;
+
+        } catch(error){
+            throw new Error(`Error in getting all filed requests: ${error}`);
+        }
+    }
+
+    public static getOwn = async(user_id : number | undefined) => {
+        const query = `SELECT book_title, book_author, status, admin_response FROM requests WHERE user_id = :user_id`;
+        const values = { user_id };
+
+        try{
+            const [ownRequests] = await sequelize.query(query, {
+                replacements : values,
+                type : QueryTypes.SELECT
+            });
+
+            return ownRequests;
+
+        } catch(error){
+            throw new Error(`Error in getting user's requests: ${error}`);
+        }
+    }
+
+    public static respond = async(request_id : number, status : string, admin_response : string) => {
+        const query = `UPDATE requests SET status = :status, admin_response = :admin_response WHERE request_id = :request_id`;
+        const values = { status, admin_response, request_id };
+
+        try{
+            const markResponse = await sequelize.query(query, {
+                replacements : values,
+                type : QueryTypes.UPDATE
+            });
+
+            return markResponse;
+
+        } catch(error){
+            throw new Error(`Error in marking response: ${error}`);
+        }
+    }
+
+    public static requestDetails = async(request_id : number) => {
+        const query = `SELECT book_title, book_author FROM requests WHERE request_id = :request_id`;
+        const values = { request_id };
+
+        try{
+            const [bookDetails] = await sequelize.query(query, {
+                replacements : values,
+                type : QueryTypes.SELECT
+            });
+
+            return bookDetails;
+
+        } catch(error){
+            throw new Error(`Error in getting request details: ${error}`);
+        }
     }
 }
 

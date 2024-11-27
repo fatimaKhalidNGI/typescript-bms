@@ -37,13 +37,24 @@ Book.addBook = (title, author) => __awaiter(void 0, void 0, void 0, function* ()
         throw new Error(`Error in adding book to table: ${error}`);
     }
 });
-Book.listBooks = () => __awaiter(void 0, void 0, void 0, function* () {
-    const query = `SELECT title, author FROM books`;
+Book.listBooks = (page, limit) => __awaiter(void 0, void 0, void 0, function* () {
+    const offset = (page - 1) * limit;
+    console.log(offset);
+    const query = `SELECT title, author FROM books ORDER BY title LIMIT :limit OFFSET :offset `;
+    const values = { limit, offset };
+    const countQuery = `SELECT COUNT(*) AS total FROM books`;
     try {
         const booksList = yield dbConfig_1.sequelize.query(query, {
+            replacements: values,
             type: sequelize_1.QueryTypes.SELECT
         });
-        return booksList;
+        console.log(booksList);
+        const totalCountResult = yield dbConfig_1.sequelize.query(countQuery, {
+            type: sequelize_1.QueryTypes.SELECT
+        });
+        const total = totalCountResult[0].total;
+        console.log(total);
+        return { booksList, total };
     }
     catch (error) {
         throw new Error(`Error in getting books list: ${error}`);
@@ -144,7 +155,6 @@ Book.borrow = (book_id, borrowDate, returnDate, user_id) => __awaiter(void 0, vo
 });
 Book.remove = (book_id) => __awaiter(void 0, void 0, void 0, function* () {
     const query = `DELETE FROM books WHERE book_id = :book_id`;
-    //const values = { book_id };
     try {
         const result = yield dbConfig_1.sequelize.query(query, {
             replacements: { book_id },
@@ -185,14 +195,13 @@ Book.returnBook = (book_id) => __awaiter(void 0, void 0, void 0, function* () {
     }
 });
 Book.borrowedBooksList = (user_id) => __awaiter(void 0, void 0, void 0, function* () {
-    const query = `SELECT * FROM books WHERE user_id = :user_id`;
+    const query = `SELECT title, author, borrowDate, returnDate FROM books WHERE user_id = :user_id`;
     const values = { user_id };
     try {
-        const [borrowedList] = yield dbConfig_1.sequelize.query(query, {
+        const borrowedList = yield dbConfig_1.sequelize.query(query, {
             replacements: values,
             type: sequelize_1.QueryTypes.SELECT
         });
-        console.log(borrowedList);
         return borrowedList;
     }
     catch (error) {
