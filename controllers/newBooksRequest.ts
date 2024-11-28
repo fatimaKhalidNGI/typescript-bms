@@ -22,21 +22,42 @@ class NewBooksRequests {
     }
 
     static getAllRequests = async(req : Request, res : Response) => {
-        try{
-            const requestList = await RequestModel.getAll();
+        const page = parseInt(req.query.page as string) || 1;
+        const limit = parseInt(req.query.limit as string) || 10;
 
-            res.status(200).send(requestList);
+        try{
+            const { requestList, total } = await RequestModel.getAll(page, limit);
+            
+            const response = {
+                requestList,
+                page,
+                total,
+                totalPages : Math.ceil(total / limit)
+            };
+            
+            res.status(200).send(response);
         } catch(error){
             res.status(500).send(error);
         }
     }
 
     static getOwnRequests = async(req : CustomRequest, res : Response) => {
+        const page = parseInt(req.query.page as string) || 1;
+        const limit = parseInt(req.query.limit as string) || 10;
+
         const user_id = req.user_id;
 
         try{
-            const ownRequests = await RequestModel.getOwn(user_id);
-            res.status(200).send(ownRequests);
+            const { ownRequests, total } = await RequestModel.getOwn(user_id, page, limit);
+
+            const response = {
+                ownRequests,
+                page,
+                total,
+                totalPages : Math.ceil(total / limit)
+            };
+
+            res.status(200).send(response);
 
         } catch(error){
             res.status(500).send(error);

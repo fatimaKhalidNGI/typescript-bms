@@ -39,7 +39,6 @@ Book.addBook = (title, author) => __awaiter(void 0, void 0, void 0, function* ()
 });
 Book.listBooks = (page, limit) => __awaiter(void 0, void 0, void 0, function* () {
     const offset = (page - 1) * limit;
-    console.log(offset);
     const query = `SELECT title, author FROM books ORDER BY title LIMIT :limit OFFSET :offset `;
     const values = { limit, offset };
     const countQuery = `SELECT COUNT(*) AS total FROM books`;
@@ -60,29 +59,46 @@ Book.listBooks = (page, limit) => __awaiter(void 0, void 0, void 0, function* ()
         throw new Error(`Error in getting books list: ${error}`);
     }
 });
-Book.findByAuthor = (st) => __awaiter(void 0, void 0, void 0, function* () {
-    const query = `SELECT title, author FROM books WHERE author LIKE :searchTerm AND borrowDate IS NULL`;
-    const values = { searchTerm: `%${st}%` };
+Book.findByAuthor = (st, page, limit) => __awaiter(void 0, void 0, void 0, function* () {
+    const offset = (page - 1) * limit;
+    const query = `SELECT title, author FROM books WHERE author LIKE :searchTerm AND borrowDate IS NULL ORDER BY title LIMIT :limit OFFSET :offset`;
+    const countQuery = `SELECT COUNT(*) AS total FROM books WHERE author LIKE :searchTerm AND borrowDate IS NULL`;
+    const values1 = { searchTerm: `%${st}%`, limit, offset };
+    const values2 = { searchTerm: `%${st}%` };
     try {
         const results = yield dbConfig_1.sequelize.query(query, {
-            replacements: values,
+            replacements: values1,
             type: sequelize_1.QueryTypes.SELECT
         });
-        return results;
+        const totalCountResult = yield dbConfig_1.sequelize.query(countQuery, {
+            replacements: values2,
+            type: sequelize_1.QueryTypes.SELECT
+        });
+        const total = totalCountResult[0].total;
+        console.log(totalCountResult);
+        console.log(total);
+        return { results, total };
     }
     catch (error) {
         throw new Error(`Error in searching by author: ${error}`);
     }
 });
-Book.findByTitle = (st) => __awaiter(void 0, void 0, void 0, function* () {
-    const query = `SELECT title, author FROM books WHERE title LIKE :searchTerm AND borrowDate IS NULL`;
-    const values = { searchTerm: `%${st}%` };
+Book.findByTitle = (st, page, limit) => __awaiter(void 0, void 0, void 0, function* () {
+    const offset = (page - 1) * limit;
+    const query = `SELECT title, author FROM books WHERE title LIKE :searchTerm AND borrowDate IS NULL ORDER BY title LIMIT :limit OFFSET :offset`;
+    const countQuery = `SELECT COUNT(*) AS total FROM books WHERE title LIKE :searchTerm AND borrowDate IS NULL`;
+    const values = { searchTerm: `%${st}%`, limit, offset };
     try {
         const results = yield dbConfig_1.sequelize.query(query, {
             replacements: values,
             type: sequelize_1.QueryTypes.SELECT
         });
-        return results;
+        const totalCountResult = yield dbConfig_1.sequelize.query(countQuery, {
+            replacements: values,
+            type: sequelize_1.QueryTypes.SELECT
+        });
+        const total = totalCountResult[0].total;
+        return { results, total };
     }
     catch (error) {
         throw new Error(`Error in searching by title: ${error}`);

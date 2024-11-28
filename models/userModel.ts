@@ -139,45 +139,75 @@ export class User extends Model<UserAttributes> implements UserAttributes {
         }
     }
 
-    public static listAll = async() => {
-        const query = `SELECT name, email, role FROM users`;
+    public static listAll = async(page : number, limit : number) => {
+        const offset = (page - 1) * limit;
+        const query = `SELECT name, email, role FROM users ORDER BY name LIMIT :limit OFFSET :offset`;
+        const countQuery = `SELECT COUNT(*) AS total FROM users`
+
+        const values = { limit, offset };
 
         try{
             const list = await sequelize.query(query, {
+                replacements : values,
                 type : QueryTypes.SELECT
             });
 
-            return list;
+            const totalCountResult : any[] = await sequelize.query(countQuery, {
+                type : QueryTypes.SELECT
+            });
+            const total = totalCountResult[0].total;
+
+            return { list, total };
 
         } catch(error){
             throw new Error(`Error in getting users list: ${error}`);
         }
     }
 
-    public static usersList = async() => {
-        const query = `SELECT name, email FROM users WHERE role = "User"`;
+    public static usersList = async(page : number, limit : number) => {
+        const offset = (page - 1) * limit;
+        const query = `SELECT name, email FROM users WHERE role = "User" ORDER BY name LIMIT :limit OFFSET :offset`;
+        const countQuery = `SELECT COUNT(*) AS total FROM users WHERE role = "User"`;
+
+        const values = { limit, offset };
 
         try{
             const foundUsers = await sequelize.query(query, {
+                replacements : values,
                 type : QueryTypes.SELECT
             });
 
-            return foundUsers;
+            const totalCountResult : any[] = await sequelize.query(countQuery, {
+                type : QueryTypes.SELECT
+            });
+            const total = totalCountResult[0].total;
+
+            return { foundUsers, total };
 
         } catch(error){
             throw new Error(`Error in listing "users": ${error}`);
         }
     }
 
-    public static adminsList = async() => {
-        const query = `SELECT name, email FROM users WHERE role = "Admin"`;
+    public static adminsList = async(page : number, limit : number) => {
+        const offset = (page - 1) * limit;
+        const query = `SELECT name, email FROM users WHERE role = "Admin" ORDER BY name LIMIT :limit OFFSET :offset`;
+        const countQuery = `SELECT COUNT(*) AS total FROM users WHERE role = "Admin"`;
+
+        const values = { limit, offset };
 
         try{
-            const foundUsers = await sequelize.query(query, {
+            const foundAdmins = await sequelize.query(query, {
+                replacements : values,
                 type : QueryTypes.SELECT
             });
 
-            return foundUsers;
+            const totalCountResult : any[] = await sequelize.query(countQuery, {
+                type : QueryTypes.SELECT
+            });
+            const total = totalCountResult[0].total;
+
+            return { foundAdmins, total };
 
         } catch(error){
             throw new Error(`Error in listing "admins": ${error}`);

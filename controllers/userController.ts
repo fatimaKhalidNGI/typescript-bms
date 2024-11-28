@@ -3,49 +3,77 @@ import { UserModel } from "../config/dbConfig";
 
 class UserController {
     static listAllUsers = async(req : Request, res : Response) => {
-        try{
-            const completeList = await UserModel.listAll();
+        const page = parseInt(req.query.page as string) || 1;
+        const limit = parseInt(req.query.limit as string) || 10;
 
-            if(completeList.length === 0){
+        try{
+            const { list, total} = await UserModel.listAll(page, limit);
+
+            if(list.length === 0){
                 res.status(404).send("No records found");
                 return;
             }
 
-            res.status(200).send(completeList);
+            const response = {
+                list,
+                page,
+                total,
+                totalPages : Math.ceil(total / limit)
+            };
+
+            res.status(200).send(response);
 
         } catch(error){
-            console.log(error);
             res.status(500).send(error);
         }
     }
 
     static listUsers = async(req : Request, res : Response) => {
-        try{
-            const usersList = await UserModel.usersList();
+        const page = parseInt(req.query.page as string) || 1;
+        const limit = parseInt(req.query.limit as string) || 10;
 
-            if(usersList.length === 0){
+        try{
+            const { foundUsers, total } = await UserModel.usersList(page, limit);
+
+            if(foundUsers.length === 0){
                 res.status(404).send("No users found");
                 return;
             }
 
-            res.status(200).send(usersList);
+            const response = {
+                foundUsers,
+                page,
+                total,
+                totalPages : Math.ceil(total / limit)
+            };
+
+            res.status(200).send(response);
 
         } catch(error){
-            console.log(error);
             res.status(500).send(error);
         }
     }
 
     static listAdmins = async(req : Request, res : Response) => {
-        try{
-            const adminsList = await UserModel.adminsList();
+        const page = parseInt(req.query.page as string) || 1;
+        const limit = parseInt(req.query.limit as string) || 10;
 
-            if(adminsList.length === 0){
+        try{
+            const { foundAdmins, total } = await UserModel.adminsList(page, limit);
+
+            if(foundAdmins.length === 0){
                 res.status(404).send("No admins found");
                 return;
             }
 
-            res.status(200).send(adminsList);
+            const response = {
+                foundAdmins,
+                page,
+                total,
+                totalPages : Math.ceil(total / limit)
+            };
+
+            res.status(200).send(response);
 
         } catch(error){
             console.log(error);
@@ -95,7 +123,6 @@ class UserController {
             res.status(200).send("User deleted successfully");
 
         } catch(error){
-            console.log(error);
             res.status(500).send(error);
         }
     }
