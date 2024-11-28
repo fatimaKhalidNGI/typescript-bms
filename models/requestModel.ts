@@ -49,24 +49,38 @@ export class Request extends Model<RequestAttributes> implements RequestAttribut
         }
     }
 
-    public static getAll = async() => {
-        const query = `SELECT book_title, book_author, status, admin_response FROM requests`;
+    public static getAll = async(page : number, limit : number) => {
+        const offset = (page - 1) * limit;
+        const query = `SELECT book_title, book_author, status, admin_response FROM requests ORDER BY book_title LIMIT :limit OFFSET :offset`;
+        const countQuery = `SELECT COUNT(*) AS total FROM requests`;
+
+        const values = { limit, offset };
 
         try{
             const requestList = await sequelize.query(query, {
+                replacements : values,
                 type : QueryTypes.SELECT
             });
 
-            return requestList;
+            const totalCountResult : any[] = await sequelize.query(countQuery, {
+                type : QueryTypes.SELECT
+            });
+            const total = totalCountResult[0].total;
+
+            return { requestList, total };
 
         } catch(error){
             throw new Error(`Error in getting all filed requests: ${error}`);
         }
     }
 
-    public static getOwn = async(user_id : number | undefined) => {
-        const query = `SELECT book_title, book_author, status, admin_response FROM requests WHERE user_id = :user_id`;
-        const values = { user_id };
+    public static getOwn = async(user_id : number | undefined, page : number, limit : number) => {
+        const offset = (page - 1) * limit;
+        
+        const query = `SELECT book_title, book_author, status, admin_response FROM requests WHERE user_id = :user_id ORDER BY book_title LIMIT :limit OFFSET :offset`;
+        const countQuery = `SELECT COUNT(*) as total FROM requests WHERE user_id = :user_id`;
+        
+        const values = { user_id, limit, offset };
 
         try{
             const [ownRequests] = await sequelize.query(query, {
@@ -74,7 +88,13 @@ export class Request extends Model<RequestAttributes> implements RequestAttribut
                 type : QueryTypes.SELECT
             });
 
-            return ownRequests;
+            const totalCountResult : any[] = await sequelize.query(countQuery, {
+                replacements : values,
+                type : QueryTypes.SELECT
+            }); 
+            const total = totalCountResult[0].total;
+
+            return { ownRequests, total };
 
         } catch(error){
             throw new Error(`Error in getting user's requests: ${error}`);

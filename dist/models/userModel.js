@@ -111,37 +111,61 @@ User.logoutFunction = (user_id) => __awaiter(void 0, void 0, void 0, function* (
         throw new Error(`Error in logging user out: ${error}`);
     }
 });
-User.listAll = () => __awaiter(void 0, void 0, void 0, function* () {
-    const query = `SELECT name, email, role FROM users`;
+User.listAll = (page, limit) => __awaiter(void 0, void 0, void 0, function* () {
+    const offset = (page - 1) * limit;
+    const query = `SELECT name, email, role FROM users ORDER BY name LIMIT :limit OFFSET :offset`;
+    const countQuery = `SELECT COUNT(*) AS total FROM users`;
+    const values = { limit, offset };
     try {
         const list = yield dbConfig_1.sequelize.query(query, {
+            replacements: values,
             type: sequelize_1.QueryTypes.SELECT
         });
-        return list;
+        const totalCountResult = yield dbConfig_1.sequelize.query(countQuery, {
+            type: sequelize_1.QueryTypes.SELECT
+        });
+        const total = totalCountResult[0].total;
+        return { list, total };
     }
     catch (error) {
         throw new Error(`Error in getting users list: ${error}`);
     }
 });
-User.usersList = () => __awaiter(void 0, void 0, void 0, function* () {
-    const query = `SELECT name, email FROM users WHERE role = "User"`;
+User.usersList = (page, limit) => __awaiter(void 0, void 0, void 0, function* () {
+    const offset = (page - 1) * limit;
+    const query = `SELECT name, email FROM users WHERE role = "User" ORDER BY name LIMIT :limit OFFSET :offset`;
+    const countQuery = `SELECT COUNT(*) AS total FROM users WHERE role = "User"`;
+    const values = { limit, offset };
     try {
         const foundUsers = yield dbConfig_1.sequelize.query(query, {
+            replacements: values,
             type: sequelize_1.QueryTypes.SELECT
         });
-        return foundUsers;
+        const totalCountResult = yield dbConfig_1.sequelize.query(countQuery, {
+            type: sequelize_1.QueryTypes.SELECT
+        });
+        const total = totalCountResult[0].total;
+        return { foundUsers, total };
     }
     catch (error) {
         throw new Error(`Error in listing "users": ${error}`);
     }
 });
-User.adminsList = () => __awaiter(void 0, void 0, void 0, function* () {
-    const query = `SELECT name, email FROM users WHERE role = "Admin"`;
+User.adminsList = (page, limit) => __awaiter(void 0, void 0, void 0, function* () {
+    const offset = (page - 1) * limit;
+    const query = `SELECT name, email FROM users WHERE role = "Admin" ORDER BY name LIMIT :limit OFFSET :offset`;
+    const countQuery = `SELECT COUNT(*) AS total FROM users WHERE role = "Admin"`;
+    const values = { limit, offset };
     try {
-        const foundUsers = yield dbConfig_1.sequelize.query(query, {
+        const foundAdmins = yield dbConfig_1.sequelize.query(query, {
+            replacements: values,
             type: sequelize_1.QueryTypes.SELECT
         });
-        return foundUsers;
+        const totalCountResult = yield dbConfig_1.sequelize.query(countQuery, {
+            type: sequelize_1.QueryTypes.SELECT
+        });
+        const total = totalCountResult[0].total;
+        return { foundAdmins, total };
     }
     catch (error) {
         throw new Error(`Error in listing "admins": ${error}`);

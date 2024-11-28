@@ -30,19 +30,35 @@ NewBooksRequests.makeRequest = (req, res) => __awaiter(void 0, void 0, void 0, f
     }
 });
 NewBooksRequests.getAllRequests = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
     try {
-        const requestList = yield dbConfig_2.RequestModel.getAll();
-        res.status(200).send(requestList);
+        const { requestList, total } = yield dbConfig_2.RequestModel.getAll(page, limit);
+        const response = {
+            requestList,
+            page,
+            total,
+            totalPages: Math.ceil(total / limit)
+        };
+        res.status(200).send(response);
     }
     catch (error) {
         res.status(500).send(error);
     }
 });
 NewBooksRequests.getOwnRequests = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
     const user_id = req.user_id;
     try {
-        const ownRequests = yield dbConfig_2.RequestModel.getOwn(user_id);
-        res.status(200).send(ownRequests);
+        const { ownRequests, total } = yield dbConfig_2.RequestModel.getOwn(user_id, page, limit);
+        const response = {
+            ownRequests,
+            page,
+            total,
+            totalPages: Math.ceil(total / limit)
+        };
+        res.status(200).send(response);
     }
     catch (error) {
         res.status(500).send(error);

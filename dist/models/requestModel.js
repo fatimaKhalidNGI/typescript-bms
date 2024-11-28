@@ -37,27 +37,42 @@ Request.createRequest = (book_title, book_author, user_id) => __awaiter(void 0, 
         throw new Error(`Error in creating new request: ${error}`);
     }
 });
-Request.getAll = () => __awaiter(void 0, void 0, void 0, function* () {
-    const query = `SELECT book_title, book_author, status, admin_response FROM requests`;
+Request.getAll = (page, limit) => __awaiter(void 0, void 0, void 0, function* () {
+    const offset = (page - 1) * limit;
+    const query = `SELECT book_title, book_author, status, admin_response FROM requests ORDER BY book_title LIMIT :limit OFFSET :offset`;
+    const countQuery = `SELECT COUNT(*) AS total FROM requests`;
+    const values = { limit, offset };
     try {
         const requestList = yield dbConfig_1.sequelize.query(query, {
+            replacements: values,
             type: sequelize_1.QueryTypes.SELECT
         });
-        return requestList;
+        const totalCountResult = yield dbConfig_1.sequelize.query(countQuery, {
+            type: sequelize_1.QueryTypes.SELECT
+        });
+        const total = totalCountResult[0].total;
+        return { requestList, total };
     }
     catch (error) {
         throw new Error(`Error in getting all filed requests: ${error}`);
     }
 });
-Request.getOwn = (user_id) => __awaiter(void 0, void 0, void 0, function* () {
-    const query = `SELECT book_title, book_author, status, admin_response FROM requests WHERE user_id = :user_id`;
-    const values = { user_id };
+Request.getOwn = (user_id, page, limit) => __awaiter(void 0, void 0, void 0, function* () {
+    const offset = (page - 1) * limit;
+    const query = `SELECT book_title, book_author, status, admin_response FROM requests WHERE user_id = :user_id ORDER BY book_title LIMIT :limit OFFSET :offset`;
+    const countQuery = `SELECT COUNT(*) as total FROM requests WHERE user_id = :user_id`;
+    const values = { user_id, limit, offset };
     try {
         const [ownRequests] = yield dbConfig_1.sequelize.query(query, {
             replacements: values,
             type: sequelize_1.QueryTypes.SELECT
         });
-        return ownRequests;
+        const totalCountResult = yield dbConfig_1.sequelize.query(countQuery, {
+            replacements: values,
+            type: sequelize_1.QueryTypes.SELECT
+        });
+        const total = totalCountResult[0].total;
+        return { ownRequests, total };
     }
     catch (error) {
         throw new Error(`Error in getting user's requests: ${error}`);

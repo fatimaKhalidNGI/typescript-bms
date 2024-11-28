@@ -46,26 +46,44 @@ BookController.listOfBooks = (req, res) => __awaiter(void 0, void 0, void 0, fun
     }
 });
 BookController.searchByAuthor = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
     const { searchTerm } = req.body;
     if (!searchTerm) {
         return res.status(400).send("Data missing!");
     }
     try {
-        const results = yield dbConfig_1.BookModel.findByAuthor(searchTerm);
-        res.status(200).send(results);
+        const { results, total } = yield dbConfig_1.BookModel.findByAuthor(searchTerm, page, limit);
+        const response = {
+            results,
+            page,
+            limit,
+            total,
+            totalPages: Math.ceil(total / limit)
+        };
+        res.status(200).send(response);
     }
     catch (error) {
         res.status(500).send(error);
     }
 });
 BookController.searchByTitle = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
     const { searchTerm } = req.body;
     if (!searchTerm) {
         return res.status(400).send("Data missing!");
     }
     try {
-        const results = yield dbConfig_1.BookModel.findByTitle(searchTerm);
-        res.status(200).send(results);
+        const { results, total } = yield dbConfig_1.BookModel.findByTitle(searchTerm, page, limit);
+        const response = {
+            results,
+            page,
+            limit,
+            total,
+            totalPages: Math.ceil(total / limit)
+        };
+        res.status(200).send(response);
     }
     catch (error) {
         res.status(500).send(error);

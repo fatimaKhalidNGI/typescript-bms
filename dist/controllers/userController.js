@@ -15,41 +15,63 @@ class UserController {
 }
 _a = UserController;
 UserController.listAllUsers = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
     try {
-        const completeList = yield dbConfig_1.UserModel.listAll();
-        if (completeList.length === 0) {
+        const { list, total } = yield dbConfig_1.UserModel.listAll(page, limit);
+        if (list.length === 0) {
             res.status(404).send("No records found");
             return;
         }
-        res.status(200).send(completeList);
+        const response = {
+            list,
+            page,
+            total,
+            totalPages: Math.ceil(total / limit)
+        };
+        res.status(200).send(response);
     }
     catch (error) {
-        console.log(error);
         res.status(500).send(error);
     }
 });
 UserController.listUsers = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
     try {
-        const usersList = yield dbConfig_1.UserModel.usersList();
-        if (usersList.length === 0) {
+        const { foundUsers, total } = yield dbConfig_1.UserModel.usersList(page, limit);
+        if (foundUsers.length === 0) {
             res.status(404).send("No users found");
             return;
         }
-        res.status(200).send(usersList);
+        const response = {
+            foundUsers,
+            page,
+            total,
+            totalPages: Math.ceil(total / limit)
+        };
+        res.status(200).send(response);
     }
     catch (error) {
-        console.log(error);
         res.status(500).send(error);
     }
 });
 UserController.listAdmins = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
     try {
-        const adminsList = yield dbConfig_1.UserModel.adminsList();
-        if (adminsList.length === 0) {
+        const { foundAdmins, total } = yield dbConfig_1.UserModel.adminsList(page, limit);
+        if (foundAdmins.length === 0) {
             res.status(404).send("No admins found");
             return;
         }
-        res.status(200).send(adminsList);
+        const response = {
+            foundAdmins,
+            page,
+            total,
+            totalPages: Math.ceil(total / limit)
+        };
+        res.status(200).send(response);
     }
     catch (error) {
         console.log(error);

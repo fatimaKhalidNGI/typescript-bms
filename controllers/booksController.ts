@@ -39,14 +39,26 @@ class BookController {
     }
 
     static searchByAuthor = async(req : Request, res : Response) : Promise<any> => {
+        const page = parseInt(req.query.page as string) || 1;
+        const limit = parseInt(req.query.limit as string ) || 10;
+        
         const { searchTerm } = req.body;
         if(!searchTerm){
             return res.status(400).send("Data missing!");
         }
 
         try{
-            const results = await BookModel.findByAuthor(searchTerm);
-            res.status(200).send(results);
+            const { results, total } = await BookModel.findByAuthor(searchTerm, page, limit);
+            
+            const response = {
+                results,
+                page,
+                limit,
+                total,
+                totalPages : Math.ceil(total / limit)
+            };
+            
+            res.status(200).send(response);
 
         } catch(error){
             res.status(500).send(error);
@@ -54,14 +66,26 @@ class BookController {
     }
 
     static searchByTitle = async(req : Request, res : Response) : Promise<any> => {
+        const page = parseInt(req.query.page as string) || 1;
+        const limit = parseInt(req.query.limit as string ) || 10;
+
         const { searchTerm } = req.body;
         if(!searchTerm){
             return res.status(400).send("Data missing!");
         }
 
         try{
-            const results = await BookModel.findByTitle(searchTerm);
-            res.status(200).send(results);
+            const { results, total } = await BookModel.findByTitle(searchTerm, page, limit);
+
+            const response = {
+                results,
+                page,
+                limit,
+                total,
+                totalPages : Math.ceil(total / limit)
+            };
+
+            res.status(200).send(response);
 
         } catch(error){
             res.status(500).send(error);
